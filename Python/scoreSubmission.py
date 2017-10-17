@@ -110,7 +110,7 @@ def score(truthFiles, testFiles, groundTruthFiles):
         
         # find the match with the GT
         truthMatch = matchInputFile( testFile, groundTruthFiles)
-        
+#        
 #        print(truthFiles[truthMatch]) 
 #        print(testFile)
         
@@ -142,7 +142,7 @@ def scoreAll(args):
 
     truthSubFiles  = []
     for tFile in os.listdir(truthDir):
-        truthSubFiles.append( truthDir + tFile)
+        truthSubFiles.append( truthDir  + '/' + tFile)
   
     
 	## group submissions

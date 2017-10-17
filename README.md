@@ -30,4 +30,4 @@ To run the code locally, Install docker and make sure that the docker
 container is up to date.  Run the container with the call similar to
 the following:
 
-`docker run -v /path/to/data/folder:/mnt/girder_worker/data ecgimaging/cei_preprocessingecgi:latest --groundtruth=/mnt/girder_worker/data/ground_truth --submission=/mnt/girder_worker/data/ground_truth`
+`docker run -v /path/to/data/folder:/mnt/girder_worker/data ecgimaging/cei_preprocessingecgi:latest --groundtruth=/mnt/girder_worker/data/ground_truth/ --submission=/mnt/girder_worker/data/ground_truth/`

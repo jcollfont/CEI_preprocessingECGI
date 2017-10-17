@@ -97,7 +97,7 @@ def groupSubmissions(testDir,groundTruthFiles):
         fileType = splitText[-1]
       
         if any( (fileType.find(s)>=0) for s in sbGroups):
-            groupedSubmissions[fileType].append(testDir + sbFile)
+            groupedSubmissions[fileType].append(testDir + '/' + sbFile)
             
 
     return {'groupNames' : sbGroups, 'groupFiles': groupedSubmissions}

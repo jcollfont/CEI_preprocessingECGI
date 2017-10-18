@@ -96,7 +96,7 @@ def score(truthFiles, testFiles, scoreGroup):
     # for every test file
     for testIX in range(len(testFiles)):
         
-        FileName = os.path.split(testFiles[testIX])[1]
+        FileName = os.path.splitext( os.path.split(testFiles[testIX])[1] )[0]
         
         
         metrics = [

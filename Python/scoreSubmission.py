@@ -87,11 +87,11 @@ def unzipAll(directory, delete=True):
 
 
 
-def score(truthFiles, testFiles):
+def score(truthFiles, testFiles, scoreGroup):
 
     scores = []
     
-    groundTruthFilesWithoutMat, truthMatch = assocSubmissions2GroundTruh(truthFiles, testFiles)
+    groundTruthFilesWithoutMat, truthMatch = assocSubmissions2GroundTruh(truthFiles, testFiles, scoreGroup)
     
     # for every test file
     for testIX in range(len(testFiles)):
@@ -159,7 +159,7 @@ def scoreAll(args):
     # score each group of submissions separately
     scores = []
     for scoreGroup in grouped['groupNames']:
-        scores.append( score( truthSubFiles, grouped['groupFiles'][scoreGroup] ))
+        scores.append( score( truthSubFiles, grouped['groupFiles'][scoreGroup], scoreGroup ))
         
     if scores==[]:
         raise ScoreException(

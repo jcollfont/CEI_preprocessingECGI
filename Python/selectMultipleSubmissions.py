@@ -22,7 +22,7 @@ import os
 # groundTruthFiles = ['Case2_Pacing_', 'Case2_PacingtoVTtoVF_', 'Healthy_OS_1058_2kHz_', 'Healthy_OS_1117_1kHz_']
 
 ##  Associate each submitted file with the right GT
-def assocSubmissions2GroundTruh( groundTruthFiles, submittedFiles):
+def assocSubmissions2GroundTruh( groundTruthFiles, submittedFiles, sbType):
 
     
     groundTruthFilesWithoutMat = []
@@ -33,11 +33,16 @@ def assocSubmissions2GroundTruh( groundTruthFiles, submittedFiles):
     matchedFiles = []
     # for all files in submitted files
     for sbFile in submittedFiles:
+        
+        sbFileClean = os.path.split(sbFile)[-1] 
+        
+#        print( sbFileClean )
+        
+        
         for s in range(len(groundTruthFilesWithoutMat)):
-            if (sbFile.find( groundTruthFilesWithoutMat[s] )>=0):
+#            print( groundTruthFilesWithoutMat[s] + '_' + sbType )
+            if ( sbFileClean ==  groundTruthFilesWithoutMat[s] + '_' + sbType ):
                 matchedFiles.append(s)
-            else:
-                matchedFiles.append([])
 
     return groundTruthFilesWithoutMat, matchedFiles
 

@@ -111,8 +111,8 @@ def score(truthFiles, testFiles, groundTruthFiles):
         # find the match with the GT
         truthMatch = matchInputFile( testFile, groundTruthFiles)
 #        
-#        print(truthFiles[truthMatch]) 
-#        print(testFile)
+        print(truthFiles[truthMatch]) 
+        print(testFile)
         
         # load files
         truthMatrix = scipy.io.loadmat(truthFiles[truthMatch])['Signal']['Ve'][0][0]

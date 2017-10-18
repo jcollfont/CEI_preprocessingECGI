@@ -49,20 +49,6 @@ def matchInputFile( testFile, groundTruthFiles):
     return testMatch
 
 
-def checkFile(truthPath, testPath):
-
-    truthMatrix = loadFileFromPath(truthPath)
-    testMatrix = loadFileFromPath(testPath)
-    #print ('TruthMatrix:')
-    #print (truthMatrix.shape[0:2])
-    #print ('TestMatrix:')
-    #print (truthMatrix.shape)
-
-    if testMatrix.shape[0:2] != truthMatrix.shape[0:2]:
-        raise ScoreException('Matrix %s has dimensions %s; expected %s.' %
-                             (os.path.basename(testPath), testMatrix.shape[0:2],
-                              truthMatrix.shape[0:2]))
-
 class ScoreException(Exception):
     pass
 

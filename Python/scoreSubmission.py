@@ -26,7 +26,7 @@ import sys
 import scipy.io
 import zipfile
 
-from selectMultipleSubmissions import groupSubmissions
+from selectMultipleSubmissions import groupSubmissions, assocSubmissions2GroundTruh
 from scoreCommon import ScoreException, evaluateL2, matchInputFile
 
 
@@ -87,14 +87,16 @@ def unzipAll(directory, delete=True):
 
 
 
-def score(truthFiles, testFiles, groundTruthFiles):
+def score(truthFiles, testFiles):
 
     scores = []
     
+    groundTruthFilesWithoutMat, truthMatch = assocSubmissions2GroundTruh(truthFiles, testFiles)
+    
     # for every test file
-    for testFile in testFiles:
+    for testIX in range(len(testFiles)):
         
-        FileName = os.path.split(testFile)[1]
+        FileName = os.path.split(testFiles[testIX])[1]
         
         
         metrics = [
@@ -108,27 +110,29 @@ def score(truthFiles, testFiles, groundTruthFiles):
             }
         ]
         
-        # find the match with the GT
-        truthMatch = matchInputFile( testFile, groundTruthFiles)
-#        
-        print(truthFiles[truthMatch]) 
-        print(testFile)
+#        # find the match with the GT
+#        truthMatch = matchInputFile( testFile, groundTruthFiles)
         
-        # load files
-        truthMatrix = scipy.io.loadmat(truthFiles[truthMatch])['Signal']['Ve'][0][0]
-        testMatrix = scipy.io.loadmat(testFile)['Signal']['Ve'][0][0]
+#        print(truthFiles[truthMatch[testIX]]) 
+#        print(testFiles[testIX])
         
-        # evaluate L2
-        metrics[0]['value'] = evaluateL2( truthMatrix, testMatrix)
-
-#        print( metrics[0]['value']  ) 
-        # evaluate MFS solution
-#        metrics[1].value = 
-        
-        scores.append({
-            'dataset': FileName,
-            'metrics': metrics
-        })
+        if truthMatch[testIX] > -1:
+            
+            # load files
+            truthMatrix = scipy.io.loadmat(truthFiles[truthMatch[testIX]])['Signal']['Ve'][0][0]
+            testMatrix = scipy.io.loadmat(testFiles[testIX])['Signal']['Ve'][0][0]
+            
+            # evaluate L2
+            metrics[0]['value'] = evaluateL2( truthMatrix, testMatrix)
+    
+    #        print( metrics[0]['value']  ) 
+            # evaluate MFS solution
+    #        metrics[1].value = 
+            
+            scores.append({
+                'dataset': FileName,
+                'metrics': metrics
+            })
 
     return scores
 
@@ -155,7 +159,7 @@ def scoreAll(args):
     # score each group of submissions separately
     scores = []
     for scoreGroup in grouped['groupNames']:
-        scores.append(score(truthSubFiles, grouped['groupFiles'][scoreGroup], groundTruthFileRef ))
+        scores.append( score( truthSubFiles, grouped['groupFiles'][scoreGroup] ))
         
     if scores==[]:
         raise ScoreException(

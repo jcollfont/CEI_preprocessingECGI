@@ -18,35 +18,28 @@
 ###############################################################################
 
 import os
-import numpy as np
 
 # groundTruthFiles = ['Case2_Pacing_', 'Case2_PacingtoVTtoVF_', 'Healthy_OS_1058_2kHz_', 'Healthy_OS_1117_1kHz_']
 
 ##  Associate each submitted file with the right GT
-def assocSubmissions2GroundTruh(truthDir, testDir, groundTruthFiles):
+def assocSubmissions2GroundTruh( groundTruthFiles, submittedFiles):
 
-	# list all the submitted files
-	submittedFiles = os.listdir(testDir)
+    
+    groundTruthFilesWithoutMat = []
+    for gtFile in groundTruthFiles:
+        groundTruthFilesWithoutMat.append( os.path.splitext(os.path.split(gtFile)[-1])[0] )
 
-	# prealocate
-	groupedFiles = []
-	gtix = 0
-	# for every ground truth file type
-	for gtFile in groundTruthFiles:
+    # prealocate
+    matchedFiles = []
+    # for all files in submitted files
+    for sbFile in submittedFiles:
+        for s in range(len(groundTruthFilesWithoutMat)):
+            if (sbFile.find( groundTruthFilesWithoutMat[s] )>=0):
+                matchedFiles.append(s)
+            else:
+                matchedFiles.append([])
 
-		groupedFiles[gtix] = []
-
-		# for all files in submitted files
-		for sbFile in submittedFiles:
-
-			# check if it belongs to the ground truth type
-			if ( sbFile.find(gtFile) >= 0 ):
-				groupedFiles[gtix].append(sbFile)
-
-
-		gtix += 1
-
-	return groupedFiles
+    return groundTruthFilesWithoutMat, matchedFiles
 
 
 ## reference ground truth files

@@ -19,83 +19,56 @@
 
 import os
 
-# groundTruthFiles = ['Case2_Pacing_', 'Case2_PacingtoVTtoVF_', 'Healthy_OS_1058_2kHz_', 'Healthy_OS_1117_1kHz_']
+rootNames = ['Case2_PacingtoVTtoVF', 'Case2_Pacing',  'Healthy_OS_1058_2kHz', 'Healthy_OS_1117_1kHz']
 
-##  Associate each submitted file with the right GT
-def assocSubmissions2GroundTruh( groundTruthFiles, submittedFiles, sbType):
+# get a unique list of all the filenameRoots in this directory
+def findFilesNameRoots(inputDir):
 
-    
-    groundTruthFilesWithoutMat = []
-    for gtFile in groundTruthFiles:
-        groundTruthFilesWithoutMat.append( os.path.splitext(os.path.split(gtFile)[-1])[0] )
+    # list directory contents
+    fileList = os.listdir(inputDir)
 
-    # prealocate
-    matchedFiles = []
-    # for all files in submitted files
-    for sbFile in submittedFiles:
+    # find files with the matching root from the list
+    matchName = []
+    for fi in fileList:
+        for rr in range(len(rootNames)):
+            if fi.find(rootNames[rr]) != -1 :
+                matchName.append(rr)
+                break
+
+    return matchName, rootNames
+
+
+def findFilesNameRoots2(inputDir, compareMatch):
+
+    # list directory contents
+    fileList = os.listdir(inputDir)
+
+    # find files with the matching root from the list
+    matchName = []
+    compareFiles = []
+    for fi in range(len(fileList)):
         
-        sbFileClean = os.path.split(sbFile)[-1] 
+        noMatch = True
         
-#        print( sbFileClean )
+        # find the corresponding matches
+        for rr in range(len(rootNames)):
+            if fileList[fi].find(rootNames[rr]) != -1 :
+                matchName.append(rr)
+                noMatch = False
+                break
         
+        # find the files to compare with same match
+        compareFiles.append([])
+        if noMatch == False:
+            for cm in range(len(compareMatch)):
+                if rr == compareMatch[cm]:
+                    compareFiles[fi].append(cm)
         
-        for s in range(len(groundTruthFilesWithoutMat)):
-#            print( groundTruthFilesWithoutMat[s] + '_' + sbType )
-            if ( sbFileClean ==  groundTruthFilesWithoutMat[s] + '_' + sbType ):
-                matchedFiles.append(s)
 
-    return groundTruthFilesWithoutMat, matchedFiles
+    return matchName, compareFiles
 
 
-## reference ground truth files
 
 
-## Detect group types
-def findSubmissionGroups(testDir, groundTruthFiles):
-
-	# list all the submitted files
-	submittedFiles = os.listdir(testDir)
-
-	# prealocate
-	sbGroups = []
-
-	# for every submitted file
-	for sbFile in submittedFiles:
-
-		# retrieve the type (last ID section)
-		splitText = sbFile.rsplit('_')
-		sbType = splitText[-1]
 
 
-		# evaluate if the type exists and is one of the ground truth files
-		if any( (sbFile.find(s)>=0) for s in groundTruthFiles):
-			if not any(sbType == s for s in sbGroups):
-				sbGroups.append(sbType)
-
-	return sbGroups
-
-## Group all submissions by the type
-def groupSubmissions(testDir,groundTruthFiles):
-
-	# list all the submitted files
-    submittedFiles = os.listdir(testDir)
-
-	# retrieve groups
-    sbGroups = findSubmissionGroups(testDir, groundTruthFiles)
-
-	# prealocate
-    groupedSubmissions = {}
-    for sbType in sbGroups:
-            groupedSubmissions.update({ sbType : [] })
- 
-	# for all submissions
-    for sbFile in submittedFiles:
-
-        splitText = sbFile.rsplit('_')
-        fileType = splitText[-1]
-      
-        if any( (fileType.find(s)>=0) for s in sbGroups):
-            groupedSubmissions[fileType].append(testDir + '/' + sbFile)
-            
-
-    return {'groupNames' : sbGroups, 'groupFiles': groupedSubmissions}

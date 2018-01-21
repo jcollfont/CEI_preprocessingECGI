@@ -25,6 +25,7 @@ import os
 import sys
 import scipy.io
 import zipfile
+import re
 
 from selectMultipleSubmissions import groupSubmissions, assocSubmissions2GroundTruh
 from scoreCommon import ScoreException, evaluateL2, matchInputFile
@@ -90,15 +91,15 @@ def unzipAll(directory, delete=True):
 def score(truthFiles, testFiles, scoreGroup):
 
     scores = []
-    
+
     groundTruthFilesWithoutMat, truthMatch = assocSubmissions2GroundTruh(truthFiles, testFiles, scoreGroup)
-    
+
     # for every test file
     for testIX in range(len(testFiles)):
-        
+
         FileName = os.path.splitext( os.path.split(testFiles[testIX])[1] )[0]
-        
-        
+
+
         metrics = [
             {
                 'name': 'L2difference',
@@ -109,26 +110,26 @@ def score(truthFiles, testFiles, scoreGroup):
                 'value': None
             }
         ]
-        
+
 #        # find the match with the GT
 #        truthMatch = matchInputFile( testFile, groundTruthFiles)
-        
-#        print(truthFiles[truthMatch[testIX]]) 
+
+#        print(truthFiles[truthMatch[testIX]])
 #        print(testFiles[testIX])
-        
+
         if truthMatch[testIX] > -1:
-            
+
             # load files
             truthMatrix = scipy.io.loadmat(truthFiles[truthMatch[testIX]])['Signal']['Ve'][0][0]
             testMatrix = scipy.io.loadmat(testFiles[testIX])['Signal']['Ve'][0][0]
-            
+
             # evaluate L2
             metrics[0]['value'] = evaluateL2( truthMatrix, testMatrix)
-    
-    #        print( metrics[0]['value']  ) 
+
+    #        print( metrics[0]['value']  )
             # evaluate MFS solution
-    #        metrics[1].value = 
-            
+    #        metrics[1].value =
+
             scores.append({
                 'dataset': FileName,
                 'metrics': metrics
@@ -140,35 +141,75 @@ def score(truthFiles, testFiles, scoreGroup):
 
 
 def scoreAll(args):
-    
-    truthDir = args.groundtruth
-    testDir = args.submission
 
-    truthSubFiles  = []
-    for tFile in os.listdir(truthDir):
-        truthSubFiles.append( truthDir  + '/' + tFile)
-  
-    
-	## group submissions
-	# select the ground truth types
-    groundTruthFileRef = ['Case2_Pacing_', 'Case2_PacingtoVTtoVF_', 'Healthy_OS_1058_2kHz_', 'Healthy_OS_1117_1kHz_']
+    # Unzip zip files contained in the input folders
+    truthDir = args.groundtruth
+    print ('This is truth directory:')
+    print (truthDir)
+
+    truthZipSubFiles = unzipAll(truthDir, delete=True)
+
+    print('With ZIP files:')
+    print (truthZipSubFiles)
+    truthPath = None
+    if truthZipSubFiles:
+        truthPath = truthZipSubFiles[0]
+    else:
+        truthSubFiles = os.listdir(truthDir)
+        if truthSubFiles:
+            truthPath = truthSubFiles[0]
+    print('this is truthpath')
+    print(truthPath)
+    if not truthPath:
+        raise ScoreException(
+            'Internal error: error reading ground truth folder: %s' % truthDir)
+
+    testDir = args.submission
+    unzipAll(testDir, delete=True)
+    print ('Unzip of both truth and test files successful!')
+    # Identify which phase this is, based on ground truth file name
+    print (truthPath)
+    print (os.path.basename(truthPath))
+
+	# groundTruthFileRef = ['Case2_Pacing_', 'Case2_PacingtoVTtoVF_', 'Healthy_OS_1058_2kHz_', 'Healthy_OS_1117_1kHz_']
+
+    truthRe = re.match(r"(?:Case2_Pacing_|Case2_PacingtoVTtoVF_|Healthy_OS_1058_2kHz_|Healthy_OS_1117_1kHz_)",
+        os.path.basename(truthPath))
+
+    print ('True path matched')
+    print (truthRe.group())
+
+    if not truthRe:
+        raise ScoreException(
+            'Internal error: could not parse ground truth file name: %s' %
+            os.path.basename(truthPath))
+
+    phaseNum = truthRe.group()
+    print('The phase no is ')
+    print( phaseNum)
 
 	# select groups of submissions
-    grouped = groupSubmissions( testDir, groundTruthFileRef)
+	# grouped = groupSubmissions( testDir, groundTruthFileRef)
 
-    # score each group of submissions separately
+	# score each group of submissions separately
     scores = []
-    for scoreGroup in grouped['groupNames']:
-        scores.append( score( truthSubFiles, grouped['groupFiles'][scoreGroup], scoreGroup ))
-        
+    # for scoreGroup in grouped['groupNames']:
+    #     scores.append( score( truthSubFiles, grouped['groupFiles'][scoreGroup], scoreGroup ))
+	#
+    # scores = score(truthDir, testDir)
     if scores==[]:
         raise ScoreException(
             'Internal error: There are no matching submission' )
 
-    #print(scores)
-    #print ('-------------------------Results are printed here-----------------------------')
+    print(scores)
+    print ('-------------------------Results are printed here-----------------------------')
     print(json.dumps(scores))
-    #print ('-------------------------End of Results-----------------------------')
+    print ('-------------------------End of Results-----------------------------')
+
+
+    truthSubFiles  = []
+    for tFile in os.listdir(truthDir):
+        truthSubFiles.append( truthDir  + '/' + tFile)
 
 
 
